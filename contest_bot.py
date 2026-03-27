@@ -6,13 +6,14 @@
 Установка:
     pip install aiogram gspread google-auth
 
-Переменные окружения (создай файл .env):
+Переменные окружения в Railway:
     BOT_TOKEN=токен_от_BotFather
     GOOGLE_SHEET_ID=id_таблицы_из_ссылки
-    GOOGLE_CREDS_FILE=creds.json  # сервисный аккаунт Google
+    GOOGLE_CREDS_JSON=содержимое_creds.json_одной_строкой
 """
 
 import asyncio
+import json
 import logging
 import os
 from datetime import datetime
@@ -36,10 +37,10 @@ SCOPES = [
 ]
 
 def get_sheet():
-    creds = Credentials.from_service_account_file(
-        os.getenv("GOOGLE_CREDS_FILE", "creds.json"),
-        scopes=SCOPES,
-    )
+    # Читаем credentials из переменной окружения (не из файла)
+    creds_json = os.getenv("GOOGLE_CREDS_JSON")
+    creds_dict = json.loads(creds_json)
+    creds = Credentials.from_service_account_info(creds_dict, scopes=SCOPES)
     client = gspread.authorize(creds)
     sheet = client.open_by_key(os.getenv("GOOGLE_SHEET_ID")).sheet1
 
